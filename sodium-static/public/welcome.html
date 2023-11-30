@@ -2,21 +2,61 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no"/>
   <title>Sodium</title>
-  <meta name="description" content="Sodium is an Ultraviolet-based proxy site used for evading internet censorship." />
-  <meta name="keywords" content="proxy, web proxy, ultraviolet, service workers, unblock websites, unblock chromebook, free web proxy, proxy list, z1g project, proxy sites, un block chromebook, online proxy, proxy server, proxysite, proxy youtube, bypass securly, bypass iboss, bypass lightspeed filter, sodium, titanium network, unblock youtube, youtube proxy, unblocked youtube, youtube unblocked" />
-  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#434c5e" />
+  <meta name="description" content="Sodium is a site used for evading internet censorship"/>
+  <meta name="keywords" content="Sodium, z1g-project, internet-censorship, evade-internet-censorship">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#27639f"/>
   <meta property="og:image" content="/sodium.png">
-  <meta name="googlebot" content="index, follow, snippet" />
+  <meta name="googlebot" content="all"/>
+  <meta name="robots" content="all">
   <link id="favicon" rel="icon" type="image/png" href="favicon.ico">
-  <link rel="stylesheet" href="montserrat.css"/>
-  <link rel="stylesheet" href="ui.css" id="custom-css"/>
+  <link rel="stylesheet" href="assets/css/montserrat.css"/>
+  <link rel="stylesheet" href="assets/css/ui.css" id="custom-css"/>
   <link rel="manifest" href="manifest.webmanifest"/>
-  <link rel="json" href="appx.json"></link>
-  <script src="time.js" defer></script>
-  <script src="settings.js" defer></script>
-  <script src="fade.js" defer></script>
+  <link rel="json" href="assets/json/appx.json"></link>
+  <script src="/dyn/dyn.config.js"></script>
+  <script src="/dyn/dyn.worker.js"></script>
+  <script src="assets/js/debug.js" defer></script>
+  <script>
+"use strict";
+const stockSW = "/sw.js";
+const swAllowedHostnames = ["localhost", "127.0.0.1"];
+
+async function registerSW() {
+  if (
+    location.protocol !== "https:" &&
+    !swAllowedHostnames.includes(location.hostname)
+  )
+    throw new Error("Service workers cannot be registered without https.");
+
+  if (!navigator.serviceWorker)
+    throw new Error("Your browser doesn't support service workers.");
+
+  await navigator.serviceWorker.register(stockSW, {
+    scope: "/sw/",
+  });
+
+  if (navigator.onLine) {
+    navigator.serviceWorker.register('acache.js')
+    .then((registration) => {
+      console.log('Game/Asset Cache Service Worker registered with scope:', registration.scope);
+    })
+    .catch((error) => {
+      console.error('Error registering Service Worker:', error);
+    });
+  } else {
+    console.warn('Your Offline: Using existing Cache')
+  }
+}
+
+registerSW()
+  </script>
+  <script src="regcache.js" defer></script>
+  <script src="dynsw.js"></script>
+  <script src="assets/js/time.js" defer></script>
+  <script src="assets/js/settings.js" defer></script>
+  <script src="assets/js/fade.js" defer></script>
   <style>
 body {
   margin: 0;
@@ -91,17 +131,25 @@ body {
 }
 
 .slide2 h1 {
-  margin-top: -100px;
+  margin-top: -140px;
+}
+
+.slide3 h1 {
+  margin-top: -140px;
+}
+
+.slide3 h1 {
+    margin-top: -100px;
 }
   </style>
 </head>
 
 <body>
   <div class="second-bar">
-    <a href="/" class="second-bar-link home-link"></a>
-    <a href="/games/" class="second-bar-link games-link"></a>
-    <a href="/apps/" class="second-bar-link apps-link"></a>
-    <a href="/settings/" class="second-bar-link settings-link"></a>
+    <a href="/" title="Home" class="second-bar-link home-link"></a>
+    <a href="/games/" title="Games" class="second-bar-link games-link"></a>
+    <a href="/apps/" title="Apps" class="second-bar-link apps-link"></a>
+    <a href="/settings/" title="Settings" class="second-bar-link settings-link"></a>
     <div class="info-menu" id="info-menu" style="margin-left: auto">
       <div class="info-menu-item" id="transferRate"></div>
       <div class="info-menu-item" id="latency"></div>
@@ -120,7 +168,7 @@ body {
   <div class="slider">
     <div class="slide slide1">
       <div title="Sodium Logo" class="flex-center logo-wrapper header-center">
-        <img class="logo" src="sodium.png" alt="Sodium" />
+        <img class="logo" src="assets/img/logo.svg" alt="Sodium Logo"/>
         <h1>Welcome to Sodium!</h1>
       </div>
       <div class="flex-center desc">
@@ -181,59 +229,76 @@ body {
           <label for="bare-server-select" class="config-label">Custom Bare Server (Beta):</label>
           <input type="text" id="custom-bare-server-input" placeholder="Enter a url like so: https://bare.example.com" class="config-input">
         </div>
-    
-        <div class="config-row">
-          <label for="toggle-beta">Enable Tabs:</label>
-          <input type="checkbox" id="toggle-beta">
-        </div>
-    
-        <div class="config-row">
-          <label for="open-new-window">Open in about:blank Window:</label>
-          <input type="checkbox" id="open-new-window">
-        </div>
-
-        <div class="config-row">
-          <label for="css-select" class="config-label">CSS:</label>
-          <select id="css-select" class="config-select">
-            <option value="ui.css">Default (Dark)</option>
-            <option value="sodium.css">Sodium</option>
-            <option value="light.css">Light</option>
-            <option value="amoled.css">Amoled</option>
-          </select>
-          <button id="apply-css-button">Apply CSS</button>
-        </div>
-
-        <div class="config-row">
-          <label for="checkbox-24h">Use 24-Hour Time</label>
-          <input type="checkbox" id="checkbox-24h">
-        </div>
-
-        <div class="config-row">
-          <label for="checkbox-show-date">Include Date in Time Bar</label>
-          <input type="checkbox" id="checkbox-show-date">
-        </div>
-
-        <div class="config-row">
-          <label for="use-seconds-checkbox">Include Seconds in Time Bar</label>
-          <input type="checkbox" id="use-seconds-checkbox">
-        </div>
-
-        <div>
-          <p>Used Sodium before? Import your settings!</p>
-          <input type="file" id="importFile" style="display: none;" accept=".json">
-          <button onclick="openImportFile()">Import Cache</button>
-          <button onclick="exportCache()">Export Cache</button>
-        </div>
       </div>
-    </div>    
-    
+    </div>
+
     <div class="slide slide3">
+      <h1>Configure your Experience (Continued)</h1>
+      <p>Setup the settings you want to use! These can be changed later in the settings page.</p>
+
+      <div class="config-row">
+        <label for="css-select" class="config-label">CSS:</label>
+        <select id="css-select" class="config-select">
+          <option value="assets/css/ui.css">Refreshed (Defualt)</option>
+          <option value="assets/css/amoled.css">Amoled</option>
+          <option value="assets/css/mocha.css">Mocha</option>
+          <option value="assets/css/dark.css">Dark</option>
+          <option value="assets/css/legacy.css">Legacy Dark</option>
+          <option value="assets/css/festive.css">Festive</option>
+        </select>
+        <button id="apply-css-button">Apply CSS</button>
+      </div>
+      
+      <div class="config-row">
+        <label class="config-label" for="meta-theme-color">Theme Color:</label>
+        <input class="config-input" type="text" id="meta-theme-color" name="meta-theme-color">
+      </div>
+
+      <div class="config-row">
+        <label for="toggle-beta">Enable Tabs:</label>
+        <input type="checkbox" id="toggle-beta">
+      </div>
+  
+      <div class="config-row">
+        <label for="open-new-window">Open in about:blank Window:</label>
+        <input type="checkbox" id="open-new-window">
+      </div>
+
+      <div class="config-row">
+        <label for="checkbox-24h">Use 24-Hour Time</label>
+        <input type="checkbox" id="checkbox-24h">
+      </div>
+
+      <div class="config-row">
+        <label for="checkbox-show-date">Include Date in Time Bar</label>
+        <input type="checkbox" id="checkbox-show-date">
+      </div>
+
+      <div class="config-row">
+        <label for="use-seconds-checkbox">Include Seconds in Time Bar</label>
+        <input type="checkbox" id="use-seconds-checkbox">
+      </div>
+
+      <div class="config-row">
+        <label for="disable-clock">Disable Clock</label>
+        <input type="checkbox" id="disable-clock">
+      </div>
+
+      <div>
+        <p>Used Sodium before? Import your settings!</p>
+        <input type="file" id="importFile" style="display: none;" accept=".json">
+        <button onclick="openImportFile()">Import Cache</button>
+        <button onclick="exportCache()">Export Cache</button>
+      </div>
+    </div>
+    
+    <div class="slide slide4">
       <h1>Join Our Discord</h1>
       <p>If you want to find out more information about us check out our discord!</p>
       <a target="_blank" href="/discord/">Visit our Discord</a>
     </div>
 
-    <div class="slide slide4">
+    <div class="slide slide5">
       <h1>Get Started</h1>
       <p>You have compleated the Sodium FirstRun Setup!</p>
       <br>
@@ -245,16 +310,6 @@ body {
     <button class="skip-button">Skip</button>
     <button class="next-button">Next</button>
   </div>
-
-  <footer>
-    <img src="assets/img/z1g.png" alt="z1g Project" title="The z1g Project GitHub organization" height="30" width="30" onclick="location.href='/github/z1g-project/'" />
-    <img src="assets/img/discord.jpg" alt="Discord" title="The z1g Project Discord" height="30" width="30" onclick="location.href='/discord/'" />
-    <img src="assets/img/github.png" alt="GitHub" title="The official deployment repository for Sodium" height="30" width="30" onclick="location.href='/github/'" />
-    <img src="assets/img/credits.png" alt="Credits" title="License information" height="30" width="30" onclick="location.href='credits.html'" />   
-    <div class="footer-text-container" style="margin-left: auto">
-      <span>Sodium &copy; z1g Project 2023</span>
-    </div> 
-</footer>
 <script>
 const slider = document.querySelector('.slider');
 const slides = document.querySelectorAll('.slide');
@@ -312,7 +367,7 @@ showSlide(currentSlide);
             localStorage.setItem(key, importedData[key]);
           });
           alert('Cache data imported successfully.');
-          location.reload();
+          location.replace('/');
         } catch (error) {
           alert('Error importing cache data. Please check the file format.');
         }
@@ -413,9 +468,9 @@ showSlide(currentSlide);
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.getRegistrations().then(registrations => {
           for (const registration of registrations) {
-            if (registration.active && registration.active.scriptURL.includes('dynamic.sw.js')) {
+            if (registration.active && registration.active.scriptURL.includes('dyn.sw.js')) {
               registration.unregister().then(() => {
-                navigator.serviceWorker.register('/dynamic.sw.js');
+                navigator.serviceWorker.register('/dyn.sw.js');
                 console.log('Dynamic service worker re-registered.');
               });
             }
@@ -450,7 +505,7 @@ showSlide(currentSlide);
 <script>
   function immortalize(arg) {
       if (arg === 'sodium') {
-        localStorage.setItem('websiteCSS', 'immortal.css');
+        localStorage.setItem('websiteCSS', 'assets/css/immortal.css');
   
         console.log('Immortal Requested');
         console.log('Initializing 3MB Tailwind Package...');

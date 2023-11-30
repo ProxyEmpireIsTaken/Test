@@ -3,26 +3,28 @@
 <head>
   <base href="../">
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no"/>
   <title>Sodium</title>
-  <meta name="description" content="Sodium is an Ultraviolet-based proxy site used for evading internet censorship." />
-  <meta name="keywords" content="proxy, web proxy, ultraviolet, service workers, unblock websites, unblock chromebook, free web proxy, proxy list, proxy sites, un block chromebook, online proxy, proxy server, proxysite, proxy youtube, bypass securly, bypass iboss, bypass lightspeed filter, sodium, titanium network, unblock youtube, youtube proxy, unblocked youtube, youtube unblocked" />
-  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#434c5e" />
-  <meta name="googlebot" content="index, follow, snippet" />
+  <meta name="description" content="Sodium is a site used for evading internet censorship"/>
+  <meta name="keywords" content="Sodium, z1g-project, internet-censorship, evade-internet-censorship">
+  <meta property="og:image" content="/sodium.png">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#434c5e"/>
+  <meta name="googlebot" content="all"/>
   <link id="favicon" rel="icon" type="image/png" href="favicon.ico">
-  <link rel="stylesheet" href="montserrat.css"/>
-  <link rel="stylesheet" href="ui.css" id="custom-css"/>
-  <link rel="json" href="appx.json"></link>
+  <link rel="stylesheet" href="assets/css/montserrat.css"/>
+  <link rel="stylesheet" href="assets/css/ui.css" id="custom-css"/>
+  <link rel="json" href="assets/json/appx.json"></link>
   <link rel="manifest" href="manifest.webmanifest"/>
-  <script src="uv/uv.bundle.js" defer></script>
-  <script src="uv/uv.config.js" defer></script>
-  <script src="dynamic/dynamic.config.js" defer></script>
-  <script src="register-sw.js" defer></script>
-  <script src="search.js" defer></script>
-  <script src="index.js" defer></script>
-  <script src="time.js" defer></script>
-  <script src="settings.js" defer></script>
-  <script src="fade.js" defer></script>
+  <script src="ultra/ultra.bundle.js" defer></script>
+  <script src="ultra/ultra.config.js" defer></script>
+  <script src="dyn/dyn.config.js" defer></script>
+  <script src="assets/js/register-sw.js" defer></script>
+  <script src="assets/js/search.js" defer></script>
+  <script src="assets/js/index.js" defer></script>
+  <script src="assets/js/time.js" defer></script>
+  <script src="assets/js/settings.js" defer></script>
+  <script src="assets/js/fade.js" defer></script>
+  <script src="regcache.js" defer></script>
   <style>
 .sidebar {
   background-color: transparent;
@@ -64,6 +66,7 @@
 .section.active {
   display: block;
   opacity: 1;
+  animation: fade-in 0.5s ease-in-out forwards
 }
 
 .reset-button {
@@ -71,18 +74,18 @@
   padding: 0 20px;
   font-size: 16px;
   margin-left: 10px;
+  margin-bottom: 25px;
   background-color: red;
   color: #fff;
   border: none;
-  border-radius: 4px;
+  border-radius: 25px;
   cursor: pointer;
   opacity: 0;
   animation: fade-in 0.5s ease-in-out forwards;
 }
 
 .reset-button:hover {
-  background-color: darkred;
-  transform: scale(1.1);
+  transform: scale(1.2);
 }
 
 .sidebar-buttons {
@@ -98,10 +101,21 @@
   padding: 20px;
 }
 
-.addon-item {
-  border: 1px solid #ddd;
-  padding: 20px;
+.notification {
+  position: fixed;
+  top: 40px;
+  left: 0;
+  width: 100%;
+  padding: 10px;
+  background-color: #4CAF50;
+  color: white;
   text-align: center;
+  font-size: 14px;
+  transition: top 0.5s ease-in-out;
+}
+
+.hidden {
+  visibility: hidden;
 }
       </style>  
     </head>
@@ -124,10 +138,13 @@
           <p class="battery-text"></p>
         </div>
     </div>
-  </div> 
+  </div>
+  <div id="notification" class="notification hidden">
+    <p>Settings saved</p>
+  </div>
 
   <div class="sidebar">
-    <h1>Settings</h1>
+    <h1 style="text-align:left;">Settings</h1>
     <ul>
       <li data-section="general">General</li>
       <li data-section="appearance">Appearance</li>
@@ -165,15 +182,6 @@
     <input type="text" id="custom-search-engine-input" placeholder="Enter a URL like so: https://example.com/search?q=" class="config-input" style="display: none;">
     <br>
     <br>
-    <label for="dynamic-encoder" class="config-label" id="dynamic-encoder-label">Encoder:</label>
-    <select id="dynamic-encoder-select" class="config-select">
-      <option value="aes">AES (Default)</option>
-      <option value="xor">XOR</option>
-      <option value="base64">Base64</option>
-      <option value="plain">Plain (Not recommended)</option>
-    </select>
-    <br id="dynamic-encoder-br1">
-    <br id="dynamic-encoder-br2">
     <label for="emergency-switch-hotkey" class="config-label">Emergency Switch Hotkey:</label>
     <input type="text" id="emergency-switch-hotkey" class="config-input">
     <br>
@@ -182,13 +190,13 @@
     <input type="text" id="emergency-url-input" placeholder="Enter emergency URL" class="config-input">
     <br>
     <br>
-    <label for="fallback-url-input" class="config-label">about:blank Fallback URL:</label>
+    <label for="fallback-url-input" class="config-label">about:blank/blob Fallback URL:</label>
     <input type="text" id="fallback-url-input" class="config-input">
     <br>
     <br>
-    <label for="proxySelect" class="config-label">Defualt Proxy:</label>
+    <label for="proxySelect" class="config-label">Default Proxy:</label>
     <select id="proxySelect" class="config-select">
-      <option value="ultraviolet">Ultraviolet (Defualt)</option>
+      <option value="ultraviolet">Ultraviolet (Default)</option>
       <option value="dynamic">Dynamic (Beta)</option>
     </select>
     <br>
@@ -197,8 +205,16 @@
     <input type="checkbox" id="toggle-beta">
     <br>
     <br>
-    <label for="open-new-window">Open in About:blank Window:</label>
+    <label for="open-new-window">Open in About:blank Tab:</label>
     <input type="checkbox" id="open-new-window">
+    <br>
+    <br>
+    <label for="open-blob-window">Open in blob Tab:</label>
+    <input type="checkbox" id="open-blob-window">
+    <br>
+    <br>
+    <label for="title-randomizer">Cloak Name Randomizer:</label>
+    <input type="checkbox" id="title-randomizer">
     <br>
     <br>
     </div>
@@ -207,11 +223,17 @@
         <h2>Appearance Settings</h2>
         <label for="css-select" class="config-label">CSS:</label>
         <select id="css-select" class="config-select">
-          <option value="ui.css">Default (Dark)</option>
-          <option value="sodium.css">Sodium</option>
-          <option value="light.css">Light</option>
-          <option value="amoled.css">Amoled</option>
+          <option value="assets/css/ui.css">Refreshed (Defualt)</option>
+          <option value="assets/css/amoled.css">Amoled</option>
+          <option value="assets/css/mocha.css">Mocha</option>
+          <option value="assets/css/dark.css">Dark</option>
+          <option value="assets/css/legacy.css">Legacy Dark</option>
+          <option value="assets/css/festive.css">Festive</option>
         </select>
+        <br>
+        <br>
+        <label class="config-label" for="meta-theme-color">Theme Color:</label>
+        <input class="config-input" type="text" id="meta-theme-color" name="meta-theme-color">
         <br>
         <br>
         <input type="checkbox" id="checkbox-24h">
@@ -226,6 +248,10 @@
         <label for="use-seconds-checkbox">Include Seconds in Time Bar</label>
         <br>
         <br>
+        <input type="checkbox" id="disable-clock">
+        <label for="disable-clock">Disable Clock</label>
+        <br>
+        <br>
         <button id="apply-css-button">Apply CSS</button>
         <br>
         <br>
@@ -233,14 +259,9 @@
       </div>
 
       <div class="section" data-section="network">
-        <h3>Network</h3>
+        <h2>Network</h2>
         <label for="connection-status" class="config-label">Connection Status:</label>
         <p id="connection-status">Detecting...</p>
-      
-        <label for="bandwidth-limit" class="config-label">Bandwidth Limit (Mbps):</label>
-        <input type="number" id="bandwidth-limit-input" class="config-input" min="1" step="1" />
-        <br>
-        <br>
         <label for="bare-server-select" class="config-label">Custom Bare Server (Beta):</label>
         <input type="text" id="custom-bare-server-input" placeholder="Enter a url like so: https://bare.example.com" class="config-input">
         <div id="ping-status">Checking server status...</div>
@@ -273,7 +294,7 @@
             .catch(() => `🔴Offline - 0ms`);
           }
 
-          const bareServerUrl = localStorage.getItem('bareServer') || 'https://uv.holyubofficial.net';
+          const bareServerUrl = localStorage.getItem('bareServer') || 'https://server.flow-works.me/bare/';
           checkServerStatus(bareServerUrl)
           .then(status => {
             const pingElement = document.getElementById('ping-status');
@@ -291,6 +312,7 @@
       <button onclick="openImportFile()">Import Cache</button>
       <button onclick="exportCache()">Export Cache</button>
       <button id="unregisterButton">Unregister Service Workers</button>
+      <button id="reregisterButton">ReRegister Service Workers</button>
       <br>
       <br>
     </div> 
@@ -299,12 +321,12 @@
       <h2>Addons</h2>
       <div class="addon-controls">
         <label for="addon-category">Category:</label>
-        <select id="addon-category" name="addonCategory">
+        <select id="addon-category" name="addonCategory" class="config-select">
           <option value="all">All</option>
           <option value="plugins">Plugins</option>
           <option value="themes">Themes</option>
         </select>
-        <input type="text" id="addon-search" placeholder="Search Addons">
+        <input type="text" id="addon-search" class="config-input" placeholder="Search Addons">
         <button onclick="window.open('https://forms.gle/QcnfUxXCc3UjChaG8', '_blank');">Submit New Addon</button>
         <div class="settings-item">
           <label for="use-proxy-checkbox">Use Proxy:</label>
@@ -313,39 +335,7 @@
       </div>
       <div class="addon-grid">
       </div>
-      <!--div id="submission-form" style="display: none;">
-        <h3>Submit New Addon</h3>
-        <form id="addon-form">
-          <label for="addon-name">Name:</label>
-          <input type="text" id="addon-name" required><br>
-          
-          <label for="addon-category">Category:</label>
-          <select id="addon-category" required>
-            <option value="plugins">Plugin</option>
-            <option value="themes">Theme</option>
-          </select><br>
-          
-          <label for="addon-description">Description:</label>
-          <textarea id="addon-description" required></textarea><br>
-          
-          <label for="addon-publisher">Publisher:</label>
-          <input type="text" id="addon-publisher" required><br>
-          
-          <label for="addon-url">URL:</label>
-          <input type="url" id="addon-url" required><br>
-          
-          <button type="submit">Submit</button>
-        </form>
-      </div-->
       <script src="addons.js"></script>
-      <!--script>
-        const submitAddonButton = document.getElementById('submit-addon-button');
-        const submissionForm = document.getElementById('submission-form');
-
-        submitAddonButton.addEventListener('click', () => {
-          submissionForm.style.display = 'block';
-        });
-      </script-->
     </div>
 
   <script>
@@ -434,7 +424,7 @@ function showSection(sectionName) {
 <script>
 function immortalize(arg) {
   if (arg === 'sodium') {
-    localStorage.setItem('websiteCSS', 'immortal.css');
+    localStorage.setItem('websiteCSS', 'assets/css/immortal.css');
 
     console.log('Immortal Requested');
     console.log('Initializing 3MB Tailwind Package...');
@@ -470,10 +460,6 @@ function immortalize(arg) {
       window.location.href = "/settings/css-editor/";
     }
 
-    function openCompactChecker() {
-      window.location.href = "/settings/compat/";
-    }
-
     function resetSettings() {
       localStorage.clear();
       location.reload();
@@ -490,11 +476,71 @@ function immortalize(arg) {
           await registration.unregister();
           console.log(`Unregistered service worker: ${registration.scope}`);
         }
-        
+        console.log('Done! All service workers unregistered')        
         alert('All service workers unregistered.');
       } catch (error) {
         console.error('Error unregistering service workers:', error);
         alert('Error unregistering service workers. Check the console for details.');
+      }
+    });
+
+    const reregisterButton = document.getElementById('reregisterButton');
+    
+    reregisterButton.addEventListener('click', async () => {
+      try {
+        const stockSW = "/sw.js";
+        const dynSW = "/dyn.sw.js";
+        const swAllowedHostnames = ["localhost", "127.0.0.1"];
+
+        async function registerSW() {
+          if (
+            location.protocol !== "https:" &&
+            !swAllowedHostnames.includes(location.hostname)
+          )
+          throw new Error("Service workers cannot be registered without https.");
+          if (!navigator.serviceWorker)
+            throw new Error("Your browser doesn't support service workers.");
+          await navigator.serviceWorker.register(stockSW, {
+            scope: "/sw/",
+          });
+          await navigator.serviceWorker.register(dynSW, {
+            scope: "/service/",
+          });
+          if (window.location.hostname.includes('.pages.dev')) {
+            navigator.serviceWorker.register('static-cache.js')
+              .then((registration) => {
+                console.log('Static Cache Service Worker registered with scope:', registration.scope);
+              })
+              .catch((error) => {
+                console.error('Error registering Service Worker:', error);
+              });
+          } else {
+            navigator.serviceWorker.register('cache.js')
+              .then((registration) => {
+                console.log('Cache Service Worker registered with scope:', registration.scope);
+              })
+              .catch((error) => {
+                console.error('Error registering Service Worker:', error);
+              });
+          }
+          if (navigator.onLine) {
+            navigator.serviceWorker.register('acache.js')
+            .then((registration) => {
+              console.log('Game/Asset Cache Service Worker registered with scope:', registration.scope);
+            })
+            .catch((error) => {
+              console.error('Error registering Service Worker:', error);
+            });
+          } else {
+            console.warn('Your Offline: Using existing Cache')
+          }
+        }
+        registerSW()
+        console.log('Done! ReRegistered Service Workers')
+        alert('All service workers reregistered.');
+      } catch (error) {
+        console.error('Error reregistering service workers:', error);
+        alert('Error reregistering service workers. Check the console for details.');
       }
     });
   </script>

@@ -1,11 +1,12 @@
 {
   "name": "Sodium",
   "short_name": "sodium",
-  "theme_color": "#000",
+  "theme_color": "#27639f",
   "background_color": "#000",
   "display": "standalone",
   "scope": "/",
   "start_url": "/",
+  "display_override": ["window-controls-overlay"],
   "icons": [
     {
       "src": "assets/img/icon-72x72.png",
