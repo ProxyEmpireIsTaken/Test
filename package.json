@@ -1,5 +1,5 @@
 {
-  "name": "notaubsodium-instance",
+  "name": "thisisnotcool",
   "version": "2.0.0",
   "description": "Sodium is a site used for evading internet censorship",
   "type": "module",
@@ -11,7 +11,7 @@
     "start": "node index.js"
   },
   "keywords": [
-    "proxy"
+    "unblocker"
   ],
   "author": "z1g Project",
   "license": "MIT",
